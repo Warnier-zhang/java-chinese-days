@@ -2,9 +2,9 @@ package com.chinesedays.util;
 
 import com.chinesedays.model.ChineseDays;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.springframework.util.ResourceUtils;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -16,10 +16,13 @@ public class DateUtils {
     public static ChineseDays chineseDays;
 
     static {
-        try {
-            chineseDays = JSONUtils.parse(ResourceUtils.getFile("classpath:chinese-days.json"), ChineseDays.class);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        try (InputStream is = DateUtils.class.getClassLoader().getResourceAsStream("chinese-days.json")) {
+            if (is == null) {
+                throw new RuntimeException("chinese-days.json not found in classpath");
+            }
+            chineseDays = JSONUtils.parse(is, ChineseDays.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load or parse chinese-days.json", e);
         }
     }
 
